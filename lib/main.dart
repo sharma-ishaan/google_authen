@@ -8,8 +8,6 @@ GoogleSignIn _googleSignIn = GoogleSignIn(scopes: <String>[
 ]);
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -35,16 +33,18 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  GoogleSignInAccount? currentUser;
+  GoogleSignInAccount? _currentUser;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _googleSignIn.onCurrentUserChanged.listen((account) {
       setState(() {
-        currentUser = account!;
+        _currentUser = account!;
       });
-      print("user has already authenticated");
+      if (_currentUser != null) {
+        print("user has already authenticated");
+      }
     });
     _googleSignIn.signInSilently();
   }
@@ -62,57 +62,110 @@ class _SignInPageState extends State<SignInPage> {
   // Widget buildBody() {
   //   GoogleSignInAccount user = currentUser;
   Widget buildBody() {
-    if (currentUser == null) {
-      return Center(
-        child: ElevatedButton(
-          onPressed: handleSignIn,
-          child: const Text('Sign In with Google'),
-        ),
+    GoogleSignInAccount? user = _currentUser;
+    if (user != null) {
+      return Column(
+        children: [
+          SizedBox(
+            height: 90,
+          ),
+          GoogleUserCircleAvatar(identity: user),
+          SizedBox(
+            height: 20,
+          ),
+          Center(
+            child: Text(
+              user.displayName ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Center(
+            child: Text(
+              user.email,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white, fontSize: 15),
+            ),
+          ),
+          SizedBox(
+            height: 60,
+          ),
+          Center(
+            child: Text(
+              'Welcome to My application',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(
+            height: 40,
+          ),
+          ElevatedButton(onPressed: handleSignOut, child: Text('Sign Out'))
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          SizedBox(
+            height: 90,
+          ),
+          Center(
+            child: Image.asset(
+              "assets/google.png",
+              height: 200,
+              width: 200,
+            ),
+          ),
+          SizedBox(
+            height: 40,
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Welcome to Google authentication",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Center(
+            child: Container(
+              width: 250,
+              child: ElevatedButton(
+                  onPressed: handleSignIn,
+                  child: Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          "assets/google.png",
+                          height: 20,
+                          width: 20,
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text('Google Sign In')
+                      ],
+                    ),
+                  )),
+            ),
+          )
+        ],
       );
     }
-    return Column(
-      children: [
-        const SizedBox(
-          height: 90,
-        ),
-        GoogleUserCircleAvatar(identity: currentUser!),
-        const SizedBox(
-          height: 20,
-        ),
-        Center(
-          child: Text(
-            currentUser!.displayName ?? '',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        Center(
-          child: Text(
-            currentUser!.displayName ?? '',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 15),
-          ),
-        ),
-        const SizedBox(
-          height: 60,
-        ),
-        const Center(
-          child: Text(
-            'Welcome to the authentication',
-            style: TextStyle(color: Colors.white, fontSize: 20),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        const SizedBox(
-          height: 40,
-        ),
-        ElevatedButton(onPressed: handleSignOut, child: const Text('Sign Out')),
-      ],
-    );
   }
 
   @override
